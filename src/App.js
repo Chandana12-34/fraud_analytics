@@ -4,8 +4,19 @@ import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { DataGrid } from "@mui/x-data-grid";
-import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
-import "./App.css"; // Import the css file
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
+import "./App.css";
 
 const columns = [
   { field: "CustomerID", headerName: "Customer ID", width: 130 },
@@ -16,35 +27,61 @@ const columns = [
   { field: "FraudPercentage", headerName: "Fraud Percentage", width: 150 },
 ];
 
-// Example static PieChart data
+const initialRows = [];
+
+// ✅ Colors
+const COLORS = {
+  Fraudulent: "#e63946", // red
+  "Non-Fraudulent": "#4caf50", // green
+  Retail: "#2196f3",
+  Other: "#ff9800",
+  Food: "#9c27b0",
+  Travel: "#4caf50",
+};
+
+// Pie Data
 const pieData = [
   { name: "Fraudulent", value: 30 },
   { name: "Non-Fraudulent", value: 70 },
 ];
 
-const COLORS = ["#e63946", "#4caf50"]; // red and green
+// ✅ Transaction Type Data with Fraud/Non-Fraud split
+const transactionTypeData = [
+  { type: "Retail", fraud: 30, nonFraud: 70 },
+  { type: "Other", fraud: 10, nonFraud: 50 },
+  { type: "Food", fraud: 20, nonFraud: 60 },
+  { type: "Travel", fraud: 5, nonFraud: 35 },
+];
 
 function App() {
   const [startDateTime, setStartDateTime] = useState(null);
   const [endDateTime, setEndDateTime] = useState(null);
-  const [rows, setRows] = useState([]);
-
+  const [rows, setRows] = useState(initialRows);
   const minDate = dayjs("2000-01-01T00:00:00");
   const maxDate = dayjs("2040-12-31T23:59:59");
 
   const handleFilterClick = () => {
-    console.log("Filter applied:", startDateTime?.toString(), endDateTime?.toString());
-    // Implement filtering functionality if needed
+    console.log(
+      "Filter applied:",
+      startDateTime?.toString(),
+      endDateTime?.toString()
+    );
   };
 
   return (
     <Box className="app-container">
       <Box className="app-content">
-        <Typography variant="h3" component="h1" className="app-header">
+        <Typography
+          variant="h3"
+          component="h1"
+          className="app-header"
+          align="center"
+        >
           Real Time Data Analytics
         </Typography>
 
-        <Box className="filters-container">
+        {/* Filters */}
+        <Box className="filters-container" mt={2}>
           <Grid container spacing={4} justifyContent="center" alignItems="center">
             <Grid item xs={12} sm={5}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -52,14 +89,7 @@ function App() {
                   label="Start Date & Time"
                   value={startDateTime}
                   onChange={setStartDateTime}
-                  renderInput={(params) => (
-                    <TextField
-                      fullWidth
-                      {...params}
-                      InputLabelProps={{ className: "date-picker-label" }}
-                      InputProps={{ className: "date-picker-input" }}
-                    />
-                  )}
+                  renderInput={(params) => <TextField fullWidth {...params} />}
                   maxDateTime={endDateTime || maxDate}
                   minDateTime={minDate}
                 />
@@ -71,14 +101,7 @@ function App() {
                   label="End Date & Time"
                   value={endDateTime}
                   onChange={setEndDateTime}
-                  renderInput={(params) => (
-                    <TextField
-                      fullWidth
-                      {...params}
-                      InputLabelProps={{ className: "date-picker-label" }}
-                      InputProps={{ className: "date-picker-input" }}
-                    />
-                  )}
+                  renderInput={(params) => <TextField fullWidth {...params} />}
                   minDateTime={startDateTime || minDate}
                   maxDateTime={maxDate}
                 />
@@ -92,7 +115,6 @@ function App() {
                 fullWidth
                 onClick={handleFilterClick}
                 disabled={!startDateTime || !endDateTime}
-                className="filter-button"
               >
                 Filter
               </Button>
@@ -100,32 +122,63 @@ function App() {
           </Grid>
         </Box>
 
-        <Box className="data-chart-container">
-          <Box className="data-grid-container">
-            <DataGrid rows={rows} columns={columns} pageSize={10} autoHeight />
-          </Box>
+        {/* Charts */}
+        <Box
+          className="charts-container"
+          mt={4}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          gap={8}
+        >
+          {/* Pie Chart */}
+          <PieChart width={400} height={400}>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              outerRadius={120}
+              dataKey="value"
+            >
+              {pieData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend verticalAlign="bottom" height={36} />
+          </PieChart>
 
-          <Box className="pie-chart-container">
-            <PieChart width={400} height={400}>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                outerRadius={120}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent }) =>
-                  `${name}: ${(percent * 100).toFixed(0)}%`
-                }
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
+          {/* ✅ Transaction Type Analysis with Fraud/Non-Fraud split */}
+          <Box>
+            <Typography variant="h5" align="center" gutterBottom>
+              Transaction Type Analysis
+            </Typography>
+            <BarChart
+              width={500}
+              height={400}
+              data={transactionTypeData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="type" />
+              <YAxis />
               <Tooltip />
-              <Legend verticalAlign="bottom" height={36} />
-            </PieChart>
+              <Legend />
+              {/* Fraudulent bar */}
+              <Bar dataKey="fraud" name="Fraudulent" fill={COLORS["Fraudulent"]} />
+              {/* Non-Fraudulent bar */}
+              <Bar
+                dataKey="nonFraud"
+                name="Non-Fraudulent"
+                fill={COLORS["Non-Fraudulent"]}
+              />
+            </BarChart>
           </Box>
+        </Box>
+
+        {/* Table */}
+        <Box className="data-grid-container" mt={4} mx="auto" width="90%">
+          <DataGrid rows={rows} columns={columns} pageSize={10} autoHeight />
         </Box>
       </Box>
     </Box>

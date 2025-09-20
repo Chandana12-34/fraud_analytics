@@ -2,11 +2,7 @@
   position: relative;
   height: 100vh;
   width: 100vw;
-  background-image: url("E:\frontend\fraud-analytics-dashboard\public\fraud.jpeg"); /* Make sure this is in public folder */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  background-color: #f5f5f5; /* light gray background */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #333333;
   display: flex;
@@ -17,7 +13,8 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-color: rgba(255,255,255,0.7); /* semi-transparent overlay */
+  /* removed overlay since no bg image */
+  background-color: transparent; 
   z-index: 0;
 }
 
